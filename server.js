@@ -66,6 +66,24 @@ app.get('/usuarios', (req, res) => {
 
 });
 
+app.post('/agregar', (req, res) => {
+  const { nombre_tarea, estado } = req.body;
+  
+  if (!nombre_tarea || !estado) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+  
+  const query = 'INSERT INTO tareas (nombre_tarea, estado) VALUES (?, ?)';
+  db.query(query, [nombre_tarea, estado], (err, result) => {
+  
+    if (err) {
+      console.error('Error al insertar la tarea: ', err);
+      return res.status(500).json({ error: 'Error al guardar la tarea' });
+  }
+    res.status(201).json({ id: result.insertId, nombre_tarea, estado });
+  });
+});
+
 
 
 //-------------------------------------------------------------------------
