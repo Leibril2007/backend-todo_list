@@ -53,7 +53,7 @@ db.connect((err) => {
 app.get('/usuarios', (req, res) => {
   // Realiza una consulta SELECT a la base de datos
   
-  db.query('SELECT * FROM tareas', (err, results) => {
+  db.query('SELECT * FROM tarea', (err, results) => {
   if (err) {
     console.error('Error al ejecutar la consulta: ', err);
     res.status(500).send('Error en la consulta');
@@ -67,22 +67,62 @@ app.get('/usuarios', (req, res) => {
 });
 
 app.post('/agregar', (req, res) => {
-  const { nombre_tarea, estado } = req.body;
+  const { nombre, estado } = req.body;
   
-  if (!nombre_tarea || !estado) {
+  if (!nombre || !estado) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   }
   
-  const query = 'INSERT INTO tareas (nombre_tarea, estado) VALUES (?, ?)';
-  db.query(query, [nombre_tarea, estado], (err, result) => {
+  const query = 'INSERT INTO tarea (nombre, estado) VALUES (?, ?)';
+  db.query(query, [nombre, estado], (err, result) => {
   
     if (err) {
       console.error('Error al insertar la tarea: ', err);
       return res.status(500).json({ error: 'Error al guardar la tarea' });
   }
-    res.status(201).json({ id: result.insertId, nombre_tarea, estado });
+    res.status(201).json({ id: result.insertId, nombre, estado });
   });
 });
+
+
+
+app.post('/agregarUsuario', (req, res) => {
+  const { usuario, contraseña, correo } = req.body;
+  
+  // Validar que los campos necesarios estén presentes
+  if (!usuario || !contraseña || !correo) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+  
+  // Crear la consulta SQL para insertar los datos
+  const query = 'INSERT INTO usuario (usuario, contraseña, correo) VALUES (?, ?, ?)';
+  
+  // Ejecutar la consulta en la base de datos
+  db.query(query, [usuario, contraseña, correo], (err, result) => {
+    if (err) {
+      console.error('Error al insertar el usuario: ', err);
+      return res.status(500).json({ error: 'Error al guardar el usuario' });
+    }
+    
+    // Responder con el ID del nuevo usuario insertado
+    res.status(201).json({ id: result.insertId, usuario, correo });
+  });
+});
+
+
+app.get('/usuariosExistentes', (req, res) => {
+  // Realiza una consulta SELECT a la base de datos para obtener los usuarios, incluyendo la contraseña
+  db.query('SELECT id, usuario, contraseña, correo FROM usuario', (err, results) => {
+    if (err) {
+      console.error('Error al ejecutar la consulta: ', err);
+      return res.status(500).send('Error en la consulta');
+    }
+    
+    // Enviar los resultados de la consulta como respuesta en formato JSON
+    res.json(results);
+  });
+});
+
 
 
 
